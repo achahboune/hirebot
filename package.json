@@ -1,0 +1,9 @@
+{
+  "name": "hirebot",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "refresh": "node scripts/fetch-jobs.mjs",
+    "test": "node scripts/test.mjs"
+  }
+}

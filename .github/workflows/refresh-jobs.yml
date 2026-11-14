@@ -1,0 +1,35 @@
+name: Refresh jobs
+
+on:
+  schedule:
+    - cron: "0 */3 * * *"   # toutes les 3 heures (240 builds Pages/mois, limite gratuite = 500)
+  workflow_dispatch:         # bouton "Run workflow" pour lancer a la main
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-jobs
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Fetch, merge and geo-tag jobs
+        run: node scripts/fetch-jobs.mjs
+      - name: Commit snapshot
+        run: |
+          git config user.name "hirebot-bot"
+          git config user.email "hirebot-bot@users.noreply.github.com"
+          git add public/data/jobs.json
+          if git diff --cached --quiet; then
+            echo "No change"
+          else
+            git commit -m "chore: refresh jobs snapshot"
+            git push
+          fi
