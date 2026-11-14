@@ -3,135 +3,356 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HireBot — International Tech Jobs</title>
+<meta name="description" content="Search real developer and software engineering jobs across Germany, Europe and worldwide with HireBot. One search, multiple sources, original apply links.">
+<meta property="og:title" content="HireBot — International Tech Jobs">
+<meta property="og:description" content="One search across multiple job sources. Discover tech opportunities in Germany, Europe and worldwide.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0b1020">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%96%3C/text%3E%3C/svg%3E">
 <style>
 :root{
-    --primary:#0d6efd;
-    --bg:#f8f9fa;
-    --text:#212529;
-    --radius:8px;
+  --bg:#f6f7fb;--surface:#fff;--surface-2:#f1f3f9;--text:#0f172a;--muted:#64748b;--border:#e5e8f0;
+  --brand:#5b5bf0;--brand-2:#8b5cf6;--accent:#06b6d4;--ok:#10b981;--bad:#ef4444;
+  --shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px rgba(15,23,42,.06);--shadow-lg:0 12px 40px rgba(91,91,240,.18);
+  --radius:16px;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:var(--bg);
-    color:var(--text);
-    line-height:1.6;
+:root[data-theme="dark"]{
+  --bg:#0b1020;--surface:#121935;--surface-2:#1a2347;--text:#e8ecff;--muted:#93a0c8;--border:#252f5a;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px rgba(0,0,0,.35);--shadow-lg:0 12px 40px rgba(91,91,240,.35);
 }
-header{
-    background:var(--primary);
-    color:#fff;
-    padding:2rem 1rem;
-    text-align:center;
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+a{color:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;backdrop-filter:saturate(180%) blur(14px);background:color-mix(in srgb,var(--bg) 78%,transparent);border-bottom:1px solid var(--border)}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;letter-spacing:-.3px;text-decoration:none}
+.logo i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-style:normal;box-shadow:var(--shadow-lg)}
+.nav-actions{display:flex;gap:10px;align-items:center}
+.icon-btn{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:1rem;text-decoration:none;transition:.2s}
+.icon-btn:hover{transform:translateY(-1px);border-color:var(--brand)}
+
+/* HERO */
+.hero{position:relative;overflow:hidden;padding:72px 0 120px;text-align:center;color:#fff;background:radial-gradient(1200px 500px at 15% -10%,#7c3aed 0%,transparent 60%),radial-gradient(900px 500px at 90% 0%,#06b6d4 0%,transparent 55%),linear-gradient(160deg,#0b1020,#1e1b4b)}
+.hero::after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:22px 22px;mask-image:linear-gradient(to bottom,#000 30%,transparent);pointer-events:none}
+.hero .wrap{position:relative;z-index:1}
+.badge{display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(255,255,255,.22);border-radius:99px;background:rgba(255,255,255,.08);font-size:.82rem;font-weight:600;backdrop-filter:blur(6px)}
+.badge b{width:8px;height:8px;border-radius:50%;background:#34d399;box-shadow:0 0 0 4px rgba(52,211,153,.25)}
+.hero h1{font-size:clamp(2.3rem,6vw,4rem);letter-spacing:-.04em;line-height:1.05;margin:20px auto 14px;max-width:820px;font-weight:800}
+.hero h1 span{background:linear-gradient(90deg,#a5b4fc,#67e8f9);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p{max-width:620px;margin:0 auto;color:#c7d2fe;font-size:1.08rem}
+.stats{display:flex;justify-content:center;gap:34px;margin-top:34px;flex-wrap:wrap}
+.stat strong{display:block;font-size:1.7rem;font-weight:800}
+.stat small{color:#a5b4fc;font-size:.82rem}
+
+/* SEARCH CARD */
+.search{position:relative;z-index:2;margin-top:-70px;background:var(--surface);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow),var(--shadow-lg);padding:26px}
+.field-label{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.input{flex:1;min-width:220px;display:flex;align-items:center;gap:10px;padding:0 16px;height:52px;border:1px solid var(--border);border-radius:14px;background:var(--surface-2);transition:.2s}
+.input:focus-within{border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 18%,transparent);background:var(--surface)}
+.input input{flex:1;border:0;outline:0;background:transparent;color:var(--text);font-size:1rem;font-family:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:52px;padding:0 28px;border:0;border-radius:14px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:var(--shadow-lg);transition:.2s;font-family:inherit}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.06)}
+.btn:disabled{opacity:.65;cursor:wait;transform:none}
+.seg{display:inline-flex;padding:4px;border-radius:14px;background:var(--surface-2);border:1px solid var(--border);gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;color:var(--muted);padding:10px 16px;border-radius:10px;font-weight:600;font-size:.92rem;cursor:pointer;font-family:inherit;transition:.2s}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.chip{border:1px solid var(--border);background:var(--surface);color:var(--text);padding:8px 14px;border-radius:99px;font-size:.88rem;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s}
+.chip:hover{border-color:var(--brand);color:var(--brand)}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.sources{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px;padding-top:18px;border-top:1px dashed var(--border);align-items:center}
+.sources .field-label{margin:0 6px 0 0}
+.pill{display:inline-flex;align-items:center;gap:7px;font-size:.78rem;font-weight:600;padding:5px 11px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.pill.err i{background:var(--bad)}
+
+/* RESULTS */
+main{padding:34px 0 70px}
+.results-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+.results-head h2{font-size:1.5rem;letter-spacing:-.02em}
+.count{color:var(--muted);font-size:.92rem}
+.group{display:flex;align-items:center;gap:10px;margin:26px 0 12px;font-size:.82rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.group::after{content:"";flex:1;height:1px;background:var(--border)}
+.list{display:grid;gap:12px}
+.job{display:flex;gap:16px;align-items:center;padding:18px 20px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);transition:.2s;animation:up .35s ease both}
+.job:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--brand) 55%,var(--border));box-shadow:var(--shadow-lg)}
+.avatar{flex:none;display:grid;place-items:center;width:50px;height:50px;border-radius:14px;color:#fff;font-weight:800;font-size:1.15rem}
+.info{flex:1;min-width:0}
+.info h3{font-size:1.05rem;letter-spacing:-.01em;margin-bottom:3px;overflow-wrap:anywhere}
+.meta{display:flex;flex-wrap:wrap;gap:4px 16px;color:var(--muted);font-size:.9rem}
+.meta .loc{color:var(--text);font-weight:600}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tag{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:99px;background:color-mix(in srgb,var(--brand) 12%,transparent);color:var(--brand)}
+.tag.new{background:color-mix(in srgb,var(--ok) 15%,transparent);color:var(--ok)}
+.apply{flex:none;display:inline-flex;align-items:center;gap:6px;padding:11px 18px;border-radius:12px;background:var(--text);color:var(--bg);font-weight:700;font-size:.9rem;text-decoration:none;transition:.2s;white-space:nowrap}
+.apply:hover{background:var(--brand);color:#fff}
+.skeleton{height:88px;border-radius:var(--radius);background:linear-gradient(90deg,var(--surface) 25%,var(--surface-2) 37%,var(--surface) 63%);background-size:400% 100%;animation:shine 1.3s infinite;border:1px solid var(--border)}
+.state{padding:48px 20px;text-align:center;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);color:var(--muted)}
+.state big{display:block;font-size:2.2rem;margin-bottom:8px}
+.state .btn{margin-top:16px;height:44px}
+footer{border-top:1px solid var(--border);padding:30px 0;text-align:center;color:var(--muted);font-size:.86rem}
+footer a{color:var(--brand);text-decoration:none;font-weight:600}
+@keyframes shine{to{background-position:-135% 0}}
+@keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(max-width:700px){
+  .hero{padding:48px 0 110px}.search{padding:18px;border-radius:18px}
+  .job{flex-direction:column;align-items:flex-start}.apply{width:100%;justify-content:center}
+  .btn{width:100%}.seg{width:100%}.seg button{flex:1;padding:10px 8px}
 }
-header h1{font-size:2.2rem;margin-bottom:.5rem;}
-section{
-    max-width:900px;
-    margin:2rem auto;
-    padding:0 1rem;
-}
-.features{
-    display:grid;
-    gap:1.5rem;
-    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-}
-.feature{
-    background:#fff;
-    border-radius:var(--radius);
-    padding:1rem;
-    box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    text-align:center;
-}
-.feature h3{margin-bottom:.5rem;color:var(--primary);}
-.demo{
-    background:#fff;
-    border-radius:var(--radius);
-    padding:1.5rem;
-    box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    margin-top:2rem;
-}
-button{
-    background:var(--primary);
-    color:#fff;
-    border:none;
-    padding:.75rem 1.5rem;
-    border-radius:var(--radius);
-    cursor:pointer;
-    font-size:1rem;
-}
-button:disabled{
-    background:#6c757d;
-    cursor:not-allowed;
-}
-.result{
-    margin-top:1rem;
-    background:#e9ecef;
-    padding:.75rem;
-    border-radius:var(--radius);
-    font-family:monospace;
-    white-space:pre-wrap;
-}
-@media (max-width:600px){
-    header h1{font-size:1.8rem;}
-}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
-<title>HireBot – Automated Job Applications for Tech Developers</title>
-<meta name="description" content="HireBot is an AI-powered agent that scans tech job boards, fills out forms and sends applications, giving developers a speed advantage in their job search.">
-<meta property="og:title" content="HireBot – Automated Job Applications for Tech Developers">
-<meta property="og:description" content="HireBot is an AI-powered agent that scans tech job boards, fills out forms and sends applications, giving developers a speed advantage in their job search.">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="HireBot – Automated Job Applications for Tech Developers">
-<meta name="twitter:description" content="HireBot is an AI-powered agent that scans tech job boards, fills out forms and sends applications, giving developers a speed advantage in their job search.">
-<link rel="canonical" href="https://achahboune.github.io/hirebot/">
-<meta property="og:url" content="https://achahboune.github.io/hirebot/">
 </head>
 <body>
-<header>
-    <h1>HireBot</h1>
-    <p>Automated job applications for tech developers</p>
+<nav>
+  <div class="wrap">
+    <a class="logo" href="/"><i>H</i>HireBot</a>
+    <div class="nav-actions">
+      <button class="icon-btn" id="themeBtn" type="button" aria-label="Toggle dark mode">🌙</button>
+      <a class="icon-btn" href="https://github.com/achahboune/hirebot" target="_blank" rel="noopener" aria-label="GitHub">⌥</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="badge"><b></b> Live job feeds · updated hourly</span>
+    <h1>Find your next <span>tech role</span> in Germany, Europe &amp; worldwide</h1>
+    <p>One search across multiple trusted job sources. Duplicates merged, original apply links preserved.</p>
+    <div class="stats">
+      <div class="stat"><strong id="statJobs">—</strong><small>jobs indexed</small></div>
+      <div class="stat"><strong id="statSources">—</strong><small>live sources</small></div>
+      <div class="stat"><strong>3</strong><small>regions</small></div>
+    </div>
+  </div>
 </header>
 
-<section>
-    <h2>Why HireBot?</h2>
-    <div class="features">
-        <div class="feature">
-            <h3>Speed</h3>
-            <p>Apply to new tech jobs the moment they appear.</p>
-        </div>
-        <div class="feature">
-            <h3>Precision</h3>
-            <p>Targeted searches for developer roles only.</p>
-        </div>
-        <div class="feature">
-            <h3>Automation</h3>
-            <p>Resume and cover letter filling done by AI.</p>
-        </div>
-    </div>
+<div class="wrap">
+  <section class="search" aria-label="Job search">
+    <form id="searchForm">
+      <div class="field-label">Keyword</div>
+      <div class="row">
+        <label class="input" for="keyword"><span aria-hidden="true">🔎</span>
+          <input id="keyword" type="search" placeholder="e.g. Python, React, DevOps, Data Engineer…" autocomplete="off">
+        </label>
+        <button class="btn" id="searchButton" type="submit">Search jobs</button>
+      </div>
+      <div class="chips" id="chips" role="group" aria-label="Job category"></div>
 
-    <div class="demo">
-        <h3>Live Demo</h3>
-        <p>Click the button to simulate a job search and automatic application.</p>
-        <button id="runDemo">Run Demo</button>
-        <div id="output" class="result" style="display:none;"></div>
-    </div>
-</section>
+      <div class="field-label" style="margin-top:22px">Location</div>
+      <div class="seg" id="regionSeg" role="group" aria-label="Region">
+        <button type="button" data-v="Europe" class="on">🇪🇺 Europe</button>
+        <button type="button" data-v="Germany">🇩🇪 Germany</button>
+        <button type="button" data-v="Worldwide">🌍 Worldwide</button>
+      </div>
+    </form>
+    <div class="sources" id="sourceStatus"><span class="field-label">Sources</span></div>
+  </section>
+</div>
+
+<main class="wrap">
+  <div class="results-head">
+    <h2>Job opportunities</h2>
+    <span id="resultCount" class="count" role="status" aria-live="polite"></span>
+  </div>
+  <div id="jobs" class="list"></div>
+</main>
+
+<footer>
+  <div class="wrap">
+    HireBot is an independent job discovery tool. Listings remain the property of their original publishers.<br>
+    Sources: <a href="https://www.arbeitnow.com/" target="_blank" rel="noopener">Arbeitnow</a> ·
+    <a href="https://jobicy.com/" target="_blank" rel="noopener">Jobicy</a> ·
+    <a href="https://remoteok.com/" target="_blank" rel="noopener">Remote OK</a>
+  </div>
+</footer>
 
 <script>
-document.getElementById('runDemo').addEventListener('click', function(){
-    const btn = this;
-    const out = document.getElementById('output');
-    btn.disabled = true;
-    out.style.display = 'block';
-    out.textContent = 'Scanning job boards...';
-    
-    setTimeout(()=>{ out.textContent += '\nFound 3 matching developer positions.'; }, 1200);
-    setTimeout(()=>{ out.textContent += '\nFilling application forms...'; }, 2400);
-    setTimeout(()=>{ out.textContent += '\nSubmitting applications...'; }, 3600);
-    setTimeout(()=>{
-        out.textContent += '\n✅ All applications sent! You’ll hear back soon.';
-        btn.disabled = false;
-    }, 4800);
+const API = (window.HIREBOT_API || "").replace(/\/$/, "");
+const CATS = [
+  ["All tech roles", ""], ["Frontend", "frontend"], ["Backend", "backend"], ["Full-Stack", "fullstack"],
+  ["DevOps", "devops"], ["Software Engineer", "software engineer"], ["Python", "python"], ["Java", "java"],
+  ["Data Engineer", "data engineer"], ["Machine Learning", "machine learning"], ["Cloud", "cloud engineer"]
+];
+const GROUPS = {0: "🇩🇪 Germany", 1: "🇪🇺 Europe", 2: "🌍 Rest of the world"};
+const COLORS = ["#6366f1", "#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#3b82f6"];
+
+const $ = (id) => document.getElementById(id);
+const form = $("searchForm"), button = $("searchButton"), jobsBox = $("jobs"), countBox = $("resultCount");
+const keywordInput = $("keyword"), chipsBox = $("chips"), regionSeg = $("regionSeg"), sourceBox = $("sourceStatus");
+let region = "Europe", chip = "", controller = null;
+
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+
+/* ---------- theme ---------- */
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  $("themeBtn").textContent = t === "dark" ? "☀️" : "🌙";
+}
+let savedTheme = null;
+try { savedTheme = localStorage.getItem("hirebot-theme"); } catch (_) {}
+applyTheme(savedTheme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+$("themeBtn").addEventListener("click", () => {
+  const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+  applyTheme(t);
+  try { localStorage.setItem("hirebot-theme", t); } catch (_) {}
 });
+
+/* ---------- chips + region ---------- */
+for (const [label, value] of CATS) {
+  const b = el("button", "chip" + (value === "" ? " on" : ""), label);
+  b.type = "button"; b.dataset.v = value;
+  b.addEventListener("click", () => {
+    chip = value; keywordInput.value = "";
+    chipsBox.querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c === b));
+    search();
+  });
+  chipsBox.appendChild(b);
+}
+regionSeg.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
+  region = b.dataset.v;
+  regionSeg.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+  search();
+}));
+keywordInput.addEventListener("input", () => {
+  if (keywordInput.value.trim()) { chip = ""; chipsBox.querySelectorAll(".chip").forEach((c) => c.classList.remove("on")); }
+});
+
+/* ---------- rendering ---------- */
+function hash(s) { let h = 0; for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0; return Math.abs(h); }
+
+function ago(d) {
+  if (!d) return "";
+  const days = Math.floor((Date.now() - new Date(d + "T00:00:00Z").getTime()) / 86400000);
+  if (isNaN(days)) return d;
+  if (days <= 0) return "Today";
+  if (days === 1) return "Yesterday";
+  if (days < 30) return days + " days ago";
+  return d;
+}
+
+function skeletons() {
+  jobsBox.replaceChildren();
+  for (let i = 0; i < 6; i++) jobsBox.appendChild(el("div", "skeleton"));
+}
+
+function showState(icon, title, sub, retry) {
+  jobsBox.replaceChildren();
+  const s = el("div", "state");
+  s.appendChild(el("big", "", icon));
+  s.appendChild(el("strong", "", title));
+  s.appendChild(el("p", "", sub));
+  if (retry) { const b = el("button", "btn", "Try again"); b.type = "button"; b.addEventListener("click", search); s.appendChild(b); }
+  jobsBox.appendChild(s);
+}
+
+function renderJobs(jobs) {
+  jobsBox.replaceChildren();
+  countBox.textContent = jobs.length + " result" + (jobs.length === 1 ? "" : "s");
+  if (!jobs.length) return showState("🔍", "No matching jobs", "Try another category, keyword or region.");
+  let lastGroup = null, i = 0;
+  for (const job of jobs) {
+    const g = job.region_priority;
+    if (g !== undefined && g !== null && g !== lastGroup && GROUPS[g]) {
+      jobsBox.appendChild(el("div", "group", GROUPS[g]));
+      lastGroup = g;
+    }
+    const card = el("article", "job");
+    card.style.animationDelay = Math.min(i++, 12) * 25 + "ms";
+    const name = job.company || "?";
+    const av = el("div", "avatar", name.trim().charAt(0).toUpperCase());
+    av.style.background = COLORS[hash(name) % COLORS.length];
+    card.appendChild(av);
+
+    const info = el("div", "info");
+    info.appendChild(el("h3", "", job.title));
+    const meta = el("div", "meta");
+    meta.appendChild(el("span", "", job.company));
+    meta.appendChild(el("span", "loc", job.location));
+    const when = ago(job.posted_date);
+    if (when) meta.appendChild(el("span", "", when));
+    info.appendChild(meta);
+
+    const tags = el("div", "tags");
+    if (when === "Today" || when === "Yesterday") tags.appendChild(el("span", "tag new", "New"));
+    const seen = new Set();
+    for (const s of (job.source_links && job.source_links.length ? job.source_links : [{ name: (job.source || "").split("-")[0] }])) {
+      if (!s.name || seen.has(s.name)) continue;
+      seen.add(s.name);
+      tags.appendChild(el("span", "tag", s.name));
+    }
+    info.appendChild(tags);
+    card.appendChild(info);
+
+    if (job.apply_url) {
+      const a = el("a", "apply", "View job ↗");
+      a.href = job.apply_url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      card.appendChild(a);
+    }
+    jobsBox.appendChild(card);
+  }
+}
+
+/* ---------- sources ---------- */
+async function loadSourceStatus() {
+  try {
+    const r = await fetch(API + "/sources");
+    if (!r.ok) return;
+    const d = await r.json();
+    sourceBox.replaceChildren(el("span", "field-label", "Sources"));
+    const entries = Object.entries(d.sources || {});
+    for (const [name, info] of entries) {
+      const p = el("span", "pill" + (info.ok ? "" : " err"));
+      p.appendChild(el("i"));
+      p.appendChild(document.createTextNode(name + (info.ok ? " · " + info.count : " · unavailable")));
+      sourceBox.appendChild(p);
+    }
+    $("statJobs").textContent = (d.cached_jobs || 0).toLocaleString();
+    $("statSources").textContent = entries.filter(([, i]) => i.ok).length + "/" + entries.length;
+  } catch (_) { /* the search stays usable without the status panel */ }
+}
+
+/* ---------- search ---------- */
+async function search() {
+  if (controller) controller.abort();
+  controller = new AbortController();
+  const kw = keywordInput.value.trim() || chip;
+  button.disabled = true; button.textContent = "Searching…";
+  countBox.textContent = "";
+  skeletons();
+  try {
+    const r = await fetch(API + "/search", {
+      method: "POST", headers: { "Content-Type": "application/json" }, signal: controller.signal,
+      body: JSON.stringify({ keywords: kw ? [kw] : [], region: region, experience_level: "any", max_results: 100 })
+    });
+    const payload = await r.json();
+    if (!r.ok) {
+      const m = (payload.detail && payload.detail.message) || payload.detail || "Search service unavailable.";
+      throw new Error(typeof m === "string" ? m : JSON.stringify(m));
+    }
+    renderJobs(payload);
+    loadSourceStatus();
+  } catch (e) {
+    if (e.name === "AbortError") return;
+    countBox.textContent = "";
+    showState("⚠️", "Search error", e.message, true);
+  } finally {
+    button.disabled = false; button.textContent = "Search jobs";
+  }
+}
+
+form.addEventListener("submit", (e) => { e.preventDefault(); search(); });
+search();
 </script>
 </body>
 </html>
