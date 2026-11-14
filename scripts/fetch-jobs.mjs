@@ -11,13 +11,18 @@ const REMOTEOK_API = "https://remoteok.com/api";
 export const CACHE_DURATION = 10800; // 3 h (cadence de rafraichissement)
 const OUT_FILE = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "public", "data", "jobs.json");
 
-const TECH = ["software", "developer", "engineer", "programmer", "devops",
-  "frontend", "front-end", "backend", "back-end", "full stack", "python",
-  "java", "javascript", "typescript", "react", "node", "php", "golang",
-  "rust", "data engineer", "data scientist", "machine learning",
-  "artificial intelligence", "cloud", "site reliability", "qa engineer",
-  "test automation", "cybersecurity", "security engineer", "technology",
-  "technical support"];
+// Offre "tech" = le TITRE parle de dev / data / infra / securite (la description seule ne suffit plus :
+// elle faisait passer des comptables ou commerciaux de societes tech).
+const TECH_RX = new RegExp([
+  "software", "developer", "devops", "devsecops", "front-?end", "back-?end", "full[- ]?stack", "python",
+  "java(script)?", "typescript", "golang", "kotlin", "php", "react", "node\\.?js", "rust", "ruby", "scala",
+  "data (engineer|scientist)", "machine learning", "artificial intelligence", "cybersecurity", "security engineer",
+  "site reliability", "test automation", "programmer", "entwickler", "fachinformatiker", "sys-?admin",
+  "system administrator", "it support", "technical support", "cloud", "platform engineer", "infrastructure engineer",
+  "engineer", "\\b(ai|ml|qa|sre|ios|android)\\b",
+].join("|"), "i");
+const NOT_TECH_RX = /(mechanical|civil|electrical|structural|chemical|manufacturing|industrial|process|sales|account|recruit|talent|marketing|finance|legal|hr)\s+(\w+\s+)?(engineer|executive|manager)|account executive|vertriebs/i;
+
 
 // ------------------------------------------------------------ GEOGRAPHIE
 // CODE;Nom affiche;alias pays
@@ -215,7 +220,7 @@ export function normalize(source, x) {
     tags: txt(x.tags), description: stripHtml(x.description) };
 }
 
-const isTech = (j) => { const s = (j.title + " " + j.tags + " " + j.description).toLowerCase(); return TECH.some((k) => s.includes(k)); };
+export const isTech = (j) => TECH_RX.test(j.title) && !NOT_TECH_RX.test(j.title);
 
 // on garde un objet leger : le texte de recherche "kw" remplace la description complete
 const slim = (j) => ({ id: j.id, title: j.title, company: j.company, location: j.location, posted_date: j.posted_date,

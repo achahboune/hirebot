@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HireBot — International Tech Jobs</title>
-<meta name="description" content="Search real developer and software engineering jobs across Germany, Europe and worldwide with HireBot. One search, multiple sources, original apply links.">
-<meta property="og:title" content="HireBot — International Tech Jobs">
-<meta property="og:description" content="One search across multiple job sources. Discover tech opportunities in Germany, Europe and worldwide.">
+<title>HireBot — The AI agent for tech job search</title>
+<meta name="description" content="HireBot is an AI agent that automates tech job search and applications: it scans job boards, fills in forms and applies before other candidates. Built for developers who want a job fast.">
+<meta property="og:title" content="HireBot — The AI agent for tech job search">
+<meta property="og:description" content="Scans developer job boards, fills in applications and applies before the humans. Built for developers who want a job fast.">
 <meta property="og:type" content="website">
 <meta name="theme-color" content="#0b1020">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%96%3C/text%3E%3C/svg%3E">
@@ -50,7 +50,7 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:6
 .stat small{color:#a5b4fc;font-size:.82rem}
 
 /* SEARCH CARD */
-.search{position:relative;z-index:2;margin-top:-70px;background:var(--surface);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow),var(--shadow-lg);padding:26px}
+.search{position:relative;z-index:2;background:var(--surface);border:1px solid var(--border);border-radius:22px;box-shadow:var(--shadow),var(--shadow-lg);padding:26px}
 .field-label{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
 .row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
 .input{flex:1;min-width:220px;display:flex;align-items:center;gap:10px;padding:0 16px;height:52px;border:1px solid var(--border);border-radius:14px;background:var(--surface-2);transition:.2s}
@@ -98,6 +98,20 @@ main{padding:34px 0 70px}
 .state .btn{margin-top:16px;height:44px}
 footer{border-top:1px solid var(--border);padding:30px 0;text-align:center;color:var(--muted);font-size:.86rem}
 footer a{color:var(--brand);text-decoration:none;font-weight:600}
+
+.flag{display:inline-block;width:20px;height:auto;vertical-align:-3px;margin-right:6px;border-radius:3px;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+.flag-code{display:inline-block;margin-right:6px;font-size:.7rem;font-weight:800;padding:1px 5px;border-radius:4px;background:var(--surface-2);color:var(--muted)}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:26px}
+.how article{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+.how .n{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;font-weight:800;font-size:.9rem;margin-bottom:10px}
+.how h3{font-size:1.02rem;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.how p{color:var(--muted);font-size:.92rem}
+.status-tag{font-size:.68rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:99px}
+.status-tag.live{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.status-tag.soon{background:color-mix(in srgb,#f59e0b 18%,transparent);color:#b45309}
+:root[data-theme="dark"] .status-tag.soon{color:#fbbf24}
+.audience{margin-top:18px;text-align:center;color:var(--muted);font-size:.95rem}
+@media(max-width:700px){.how{grid-template-columns:1fr}}
 @keyframes shine{to{background-position:-135% 0}}
 @keyframes up{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media(max-width:700px){
@@ -121,9 +135,9 @@ footer a{color:var(--brand);text-decoration:none;font-weight:600}
 
 <header class="hero">
   <div class="wrap">
-    <span class="badge"><b></b> Live job feeds · refreshed every 3 hours</span>
-    <h1>Find your next <span>tech role</span> in Germany, Europe &amp; worldwide</h1>
-    <p>One search across multiple trusted job sources. Duplicates merged, original apply links preserved.</p>
+    <span class="badge"><b></b> AI agent for tech job search</span>
+    <h1>The AI agent that hunts <span>tech jobs</span> for you</h1>
+    <p>HireBot scans developer job boards, fills in application forms and sends your applications before the other candidates. Built for developers who want a job fast.</p>
     <div class="stats">
       <div class="stat"><strong id="statJobs">—</strong><small>jobs indexed</small></div>
       <div class="stat"><strong id="statSources">—</strong><small>live sources</small></div>
@@ -132,7 +146,15 @@ footer a{color:var(--brand);text-decoration:none;font-weight:600}
   </div>
 </header>
 
-<div class="wrap">
+<div class="wrap" style="margin-top:-70px;position:relative;z-index:2">
+  <section class="how" aria-label="How HireBot works">
+    <article><span class="n">1</span><h3>Scans the job boards <span class="status-tag live">Live</span></h3><p>Arbeitnow, Jobicy and Remote OK searched in one place, duplicates merged, original apply links kept.</p></article>
+    <article><span class="n">2</span><h3>Fills in the forms <span class="status-tag soon">Coming soon</span></h3><p>Your profile and resume matched to each role, application fields prepared automatically.</p></article>
+    <article><span class="n">3</span><h3>Applies before the humans <span class="status-tag soon">Coming soon</span></h3><p>Applications sent within seconds of a posting going live, so you are among the first in line.</p></article>
+  </section>
+</div>
+
+<div class="wrap" style="margin-top:26px">
   <section class="search" aria-label="Job search">
     <form id="searchForm">
       <div class="field-label">Keyword</div>
@@ -145,11 +167,7 @@ footer a{color:var(--brand);text-decoration:none;font-weight:600}
       <div class="chips" id="chips" role="group" aria-label="Job category"></div>
 
       <div class="field-label" style="margin-top:22px">Location</div>
-      <div class="seg" id="regionSeg" role="group" aria-label="Region">
-        <button type="button" data-v="Europe" class="on">🇪🇺 Europe</button>
-        <button type="button" data-v="Germany">🇩🇪 Germany</button>
-        <button type="button" data-v="Worldwide">🌍 Worldwide</button>
-      </div>
+      <div class="seg" id="regionSeg" role="group" aria-label="Region"></div>
     </form>
     <div class="sources" id="sourceStatus"><span class="field-label">Sources</span></div>
   </section>
@@ -157,7 +175,7 @@ footer a{color:var(--brand);text-decoration:none;font-weight:600}
 
 <main class="wrap">
   <div class="results-head">
-    <h2>Job opportunities</h2>
+    <h2>Live tech job feed</h2>
     <span id="resultCount" class="count" role="status" aria-live="polite"></span>
   </div>
   <div id="jobs" class="list"></div>
@@ -179,7 +197,8 @@ const CATS = [
   ["DevOps", "devops"], ["Software Engineer", "software engineer"], ["Python", "python"], ["Java", "java"],
   ["Data Engineer", "data engineer"], ["Machine Learning", "machine learning"], ["Cloud", "cloud engineer"]
 ];
-const GROUPS = {0: "🇩🇪 Germany", 1: "🇪🇺 Europe", 2: "🌍 Rest of the world"};
+const GROUPS = {0: ["de", "Germany"], 1: ["eu", "Europe"], 2: [null, "Rest of the world"]};
+const REGIONS = [["Europe", "eu"], ["Germany", "de"], ["Worldwide", null]];
 const COLORS = ["#6366f1", "#8b5cf6", "#06b6d4", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#3b82f6"];
 
 const $ = (id) => document.getElementById(id);
@@ -208,6 +227,18 @@ $("themeBtn").addEventListener("click", () => {
   try { localStorage.setItem("hirebot-theme", t); } catch (_) {}
 });
 
+/* ---------- flags (images : Windows n'affiche pas les drapeaux emoji, seulement "DE") ---------- */
+function flagEl(code) {
+  if (!code) return el("span", "flag-globe", "\u{1F30D} ");
+  const c = String(code).toLowerCase();
+  const img = el("img", "flag");
+  img.src = "https://flagcdn.com/w20/" + c + ".png";
+  img.srcset = "https://flagcdn.com/w40/" + c + ".png 2x";
+  img.width = 20; img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
+  img.addEventListener("error", () => img.replaceWith(el("span", "flag-code", String(code).toUpperCase())), { once: true });
+  return img;
+}
+
 /* ---------- chips + region ---------- */
 for (const [label, value] of CATS) {
   const b = el("button", "chip" + (value === "" ? " on" : ""), label);
@@ -218,6 +249,12 @@ for (const [label, value] of CATS) {
     search();
   });
   chipsBox.appendChild(b);
+}
+for (const [name, code] of REGIONS) {
+  const b = el("button", name === region ? "on" : "");
+  b.type = "button"; b.dataset.v = name;
+  b.appendChild(flagEl(code)); b.appendChild(document.createTextNode(name));
+  regionSeg.appendChild(b);
 }
 regionSeg.querySelectorAll("button").forEach((b) => b.addEventListener("click", () => {
   region = b.dataset.v;
@@ -264,7 +301,7 @@ function renderJobs(jobs) {
   for (const job of jobs) {
     const g = job.region_priority;
     if (g !== undefined && g !== null && g !== lastGroup && GROUPS[g]) {
-      jobsBox.appendChild(el("div", "group", GROUPS[g]));
+      const gh = el("div", "group"); gh.appendChild(flagEl(GROUPS[g][0])); gh.appendChild(document.createTextNode(GROUPS[g][1])); jobsBox.appendChild(gh);
       lastGroup = g;
     }
     const card = el("article", "job");
@@ -278,7 +315,12 @@ function renderJobs(jobs) {
     info.appendChild(el("h3", "", job.title));
     const meta = el("div", "meta");
     meta.appendChild(el("span", "", job.company));
-    meta.appendChild(el("span", "loc", job.location));
+    const locSpan = el("span", "loc");
+    let locText = job.location || "";
+    if (job.flag && locText.startsWith(job.flag)) locText = locText.slice(job.flag.length).trim();
+    locSpan.appendChild(flagEl(job.country_code));
+    locSpan.appendChild(document.createTextNode(locText));
+    meta.appendChild(locSpan);
     const when = ago(job.posted_date);
     if (when) meta.appendChild(el("span", "", when));
     info.appendChild(meta);

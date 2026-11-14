@@ -5,6 +5,7 @@ import { buildSnapshot, geo, flagOf } from "./fetch-jobs.mjs";
 import * as search from "../functions/search.js";
 import * as sources from "../functions/sources.js";
 import * as health from "../functions/health.js";
+import { filterJobs } from "../functions/_lib/filter.js";
 
 const arb = (i, t, l, ts, co) => ({ slug: "arb-" + i, title: t, company_name: co || "Co" + i, location: l, created_at: ts, url: "https://www.arbeitnow.com/jobs/" + i, tags: ["Software Development"], description: "<p>python</p>" });
 const job = (i, t, g, d, co) => ({ id: i, jobTitle: t, companyName: co || "Co" + i, jobGeo: g, pubDate: d + " 10:00:00", url: "https://jobicy.com/jobs/" + i, jobIndustry: ["Engineering"], jobType: ["Full-Time"], jobExcerpt: "software", jobDescription: "" });
@@ -14,7 +15,7 @@ const resp = (data, ok = true, status = 200) => ({ ok, status, json: async () =>
 let remoteDown = false;
 const fakeFetch = async (url) => {
   const u = new URL(url);
-  if (u.hostname.includes("arbeitnow")) return resp({ data: [arb(1, "Backend Developer", "Berlin", 1760000000), arb(2, "Frontend Developer", "Hamburg", 1760500000), arb(3, "Python Developer", "Vienna", 1760900000), arb(4, "Software Engineer", "", 1759000000), arb(5, "Software Engineer", "Munich", 1759500000, "SharedCo"), { ...arb(6, "Office Manager", "Berlin", 1760000000), tags: ["Admin"], description: "paperwork" }], meta: { last_page: 1 } });
+  if (u.hostname.includes("arbeitnow")) return resp({ data: [arb(1, "Backend Developer", "Berlin", 1760000000), arb(2, "Frontend Developer", "Hamburg", 1760500000), arb(3, "Python Developer", "Vienna", 1760900000), arb(4, "Software Engineer", "", 1759000000), arb(5, "Software Engineer", "Munich", 1759500000, "SharedCo"), { ...arb(6, "Office Manager", "Berlin", 1760000000), tags: ["Admin"], description: "paperwork" }, { ...arb(7, "Account Executive", "Berlin", 1760000000), description: "software company technology" }], meta: { last_page: 1 } });
   if (u.hostname.includes("jobicy")) {
     const g = u.searchParams.get("geo");
     return resp({ jobs: g === "europe"
@@ -28,7 +29,7 @@ const fakeFetch = async (url) => {
 // ---- snapshot
 let snap = await buildSnapshot(fakeFetch);
 assert.equal(snap.sources["Remote OK"].ok, true);
-assert.ok(!snap.jobs.some((j) => j.title === "Office Manager"), "offre non-tech exclue");
+assert.ok(!snap.jobs.some((j) => j.title === "Office Manager" || j.title === "Account Executive"), "offres non-tech exclues");
 const ctx = (s) => ({ env: { ASSETS: { fetch: async () => new Response(JSON.stringify(s)) } } });
 const post = async (s, body) => { const r = await search.onRequestPost({ request: new Request("https://x.test/search", { method: "POST", body: JSON.stringify(body) }), ...ctx(s) }); return { status: r.status, data: await r.json() }; };
 const q = (region, keywords = [], extra = {}) => ({ keywords, region, experience_level: "any", max_results: 100, ...extra });
@@ -57,6 +58,17 @@ assert.equal(flagOf("FR"), "\u{1F1EB}\u{1F1F7}");
 assert.equal(geo("Remote OK", "Remote - UK").country_code, "GB");
 assert.equal(geo("Remote OK", "Ukraine").country_code, "UA");   // pas confondu avec UK
 assert.equal(geo("Remote OK", "Remote").country_code, null);
+
+// ---- quotas : l'Allemagne ne doit pas occuper les 100 places
+const mk = (n, rank, code, d) => Array.from({ length: n }, (_, i) => ({ id: code + i, title: "Dev " + code + i, company: "C", location: code, posted_date: d, apply_url: "u" + code + i, source: "x", kw: "dev", region_priority: rank, countries: [code], country_code: code, flag: "", country: code, raw_location: code, source_links: [] }));
+const big = [...mk(150, 0, "DE", "2025-10-20"), ...mk(30, 1, "FR", "2025-10-10"), ...mk(60, 2, "US", "2025-10-15")];
+const cnt = (rows) => [0, 1, 2].map((p) => rows.filter((r) => r.region_priority === p).length);
+assert.deepEqual(cnt(filterJobs(big, { region: "Europe", max_results: 100 })), [70, 30, 0]);
+assert.deepEqual(cnt(filterJobs(big, { region: "Worldwide", max_results: 100 })), [40, 30, 30]);
+assert.deepEqual(cnt(filterJobs(big, { region: "Germany", max_results: 100 })), [100, 0, 0]);
+const ww = filterJobs(big, { region: "Worldwide", max_results: 100 }).map((r) => r.region_priority);
+assert.deepEqual(ww, [...ww].sort(), "ordre Allemagne -> Europe -> monde conserve");
+assert.deepEqual(cnt(filterJobs(big.slice(0, 5).concat(mk(3, 1, "FR", "2025-10-01")), { region: "Europe", max_results: 100 })), [5, 3, 0]);
 
 // ---- GET + sources + health
 const rg = await search.onRequestGet({ request: new Request("https://x.test/search?region=Europe&keywords=python&max_results=2"), ...ctx(snap) });
