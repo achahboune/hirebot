@@ -1,4 +1,5 @@
-// POST /search  (meme contrat que l'ancien backend FastAPI)  +  GET /search?region=Europe&keywords=python
+// POST /search  (meme contrat que l'ancien backend FastAPI, + "country_codes": ["FR"] optionnel)
+// GET /search?region=Europe&keywords=python&country=FR
 import { filterJobs } from "./_lib/filter.js";
 import { loadSnapshot, json } from "./_lib/snapshot.js";
 
@@ -22,5 +23,5 @@ export async function onRequestPost(ctx) {
 
 export async function onRequestGet(ctx) {
   const p = new URL(ctx.request.url).searchParams;
-  return handle({ keywords: p.getAll("keywords"), region: p.get("region") || "Germany", max_results: p.get("max_results") }, ctx);
+  return handle({ keywords: p.getAll("keywords"), region: p.get("region") || "Germany", max_results: p.get("max_results"), country_codes: p.getAll("country") }, ctx);
 }

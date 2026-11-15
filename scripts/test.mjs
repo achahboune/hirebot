@@ -5,7 +5,8 @@ import { buildSnapshot, geo, flagOf } from "./fetch-jobs.mjs";
 import * as search from "../functions/search.js";
 import * as sources from "../functions/sources.js";
 import * as health from "../functions/health.js";
-import { filterJobs } from "../functions/_lib/filter.js";
+import { filterJobs, countryFacets } from "../functions/_lib/filter.js";
+import * as countries from "../functions/countries.js";
 
 const arb = (i, t, l, ts, co) => ({ slug: "arb-" + i, title: t, company_name: co || "Co" + i, location: l, created_at: ts, url: "https://www.arbeitnow.com/jobs/" + i, tags: ["Software Development"], description: "<p>python</p>" });
 const job = (i, t, g, d, co) => ({ id: i, jobTitle: t, companyName: co || "Co" + i, jobGeo: g, pubDate: d + " 10:00:00", url: "https://jobicy.com/jobs/" + i, jobIndustry: ["Engineering"], jobType: ["Full-Time"], jobExcerpt: "software", jobDescription: "" });
@@ -69,6 +70,19 @@ assert.deepEqual(cnt(filterJobs(big, { region: "Germany", max_results: 100 })), 
 const ww = filterJobs(big, { region: "Worldwide", max_results: 100 }).map((r) => r.region_priority);
 assert.deepEqual(ww, [...ww].sort(), "ordre Allemagne -> Europe -> monde conserve");
 assert.deepEqual(cnt(filterJobs(big.slice(0, 5).concat(mk(3, 1, "FR", "2025-10-01")), { region: "Europe", max_results: 100 })), [5, 3, 0]);
+
+// ---- filtre par pays + compteurs
+const fr = filterJobs(big, { region: "Worldwide", country_codes: ["FR"], max_results: 100 });
+assert.equal(fr.length, 30); assert.ok(fr.every((r) => r.country_code === "FR"));
+assert.equal(filterJobs(big, { region: "Worldwide", country_codes: ["fr", "US"], max_results: 100 }).length, 90);
+assert.equal(filterJobs(big, { region: "Europe", country_codes: ["US"], max_results: 100 }).length, 0, "US hors region Europe");
+const fc = countryFacets(big, { region: "Worldwide" }, { DE: "Germany", FR: "France", US: "USA" });
+assert.deepEqual(fc.countries.map((c) => [c.code, c.count]), [["DE", 150], ["FR", 30], ["US", 60]]);
+assert.equal(fc.total, 240);
+const fcs = await (await countries.onRequestPost({ request: new Request("https://x.test/countries", { method: "POST", body: JSON.stringify({ region: "Europe", keywords: [] }) }), ...ctx(snap) })).json();
+console.log("facets Europe:", fcs.countries.map((c) => c.code + ":" + c.count).join(" "));
+assert.equal(fcs.countries[0].code, "DE"); assert.ok(fcs.countries.every((c) => c.priority <= 1));
+assert.ok((await post(snap, q("Worldwide", [], { country_codes: ["ZZ"] }))).data.every((r) => r.country_code === null), "ZZ = pays inconnu");
 
 // ---- GET + sources + health
 const rg = await search.onRequestGet({ request: new Request("https://x.test/search?region=Europe&keywords=python&max_results=2"), ...ctx(snap) });

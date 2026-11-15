@@ -1,4 +1,4 @@
-// Filtres Germany / Europe / Worldwide + tri (port de filter_jobs de app.py)
+// Filtres Germany / Europe / Worldwide, filtre par pays, facettes + tri (port de filter_jobs de app.py)
 const KEYWORD_ALIASES = {
   fullstack: ["fullstack", "full stack", "full-stack"],
   "full stack": ["fullstack", "full stack", "full-stack"],
@@ -8,6 +8,11 @@ const KEYWORD_ALIASES = {
 
 export const OUT_FIELDS = ["id", "title", "company", "location", "posted_date", "apply_url", "source", "flag",
   "country", "country_code", "raw_location", "region_priority", "source_links"];
+
+const EUROPE_CODES = new Set(["DE", "FR", "GB", "IE", "ES", "PT", "IT", "NL", "BE", "LU", "CH", "AT",
+  "PL", "CZ", "SK", "HU", "RO", "BG", "GR", "HR", "SI", "RS", "BA", "ME", "AL", "MK",
+  "EE", "LV", "LT", "FI", "SE", "NO", "DK", "IS", "UA", "CY", "MT", "TR", "EU"]);
+const UNKNOWN = "ZZ"; // offre sans pays identifiable (Worldwide / Remote)
 
 export function selectedRegion(q) {
   const r = String(q.region || "").toLowerCase();
@@ -23,17 +28,32 @@ function regionOk(j, region) {
   return j.region_priority <= 1; // europe : Allemagne + autres pays europeens
 }
 
-export function filterJobs(jobs, q) {
+const codesOf = (j) => (j.countries && j.countries.length ? j.countries : [UNKNOWN]);
+const byDate = (a, b) => (a.posted_date < b.posted_date ? 1 : a.posted_date > b.posted_date ? -1 : 0);
+const slimOut = (j) => Object.fromEntries(OUT_FIELDS.map((k) => [k, j[k]]));
+
+// region + mots-cles (sans le filtre pays)
+export function matching(jobs, q) {
   const region = selectedRegion(q);
   const keys = (Array.isArray(q.keywords) ? q.keywords : []).map((x) => String(x).toLowerCase().trim()).filter(Boolean);
-  const max = Math.min(100, Math.max(1, parseInt(q.max_results, 10) || 100));
-  const found = jobs.filter((j) => {
+  return jobs.filter((j) => {
     if (!regionOk(j, region)) return false;
     if (!keys.length) return true;
     return keys.some((k) => (KEYWORD_ALIASES[k] || [k]).some((f) => j.kw.includes(f)));
   });
-  found.sort((a, b) => (a.posted_date < b.posted_date ? 1 : a.posted_date > b.posted_date ? -1 : 0)); // 1) date recente d'abord
-  return mix(found, region, max).map((j) => Object.fromEntries(OUT_FIELDS.map((k) => [k, j[k]])));
+}
+
+export function filterJobs(jobs, q) {
+  const region = selectedRegion(q);
+  const max = Math.min(100, Math.max(1, parseInt(q.max_results, 10) || 100));
+  const wanted = (Array.isArray(q.country_codes) ? q.country_codes : []).map((c) => String(c).toUpperCase()).filter(Boolean);
+  let found = matching(jobs, q).sort(byDate); // 1) date recente d'abord
+  if (wanted.length) {
+    found = found.filter((j) => codesOf(j).some((c) => wanted.includes(c)));
+    found.sort((a, b) => a.region_priority - b.region_priority); // tri stable : date conservee
+    return found.slice(0, max).map(slimOut);
+  }
+  return mix(found, region, max).map(slimOut);
 }
 
 // Priorite geographique : Allemagne -> autres pays europeens -> reste du monde.
@@ -53,4 +73,23 @@ function mix(found, region, max) {
     take[i] += add; left -= add;
   }
   return [0, 1, 2].flatMap((i) => groups[i].slice(0, take[i]));
+}
+
+// Compteurs par pays (pour region + mots-cles), tries : Allemagne, Europe, reste du monde, puis par nombre d'offres
+export function countryFacets(jobs, q, names = {}) {
+  const found = matching(jobs, q);
+  const tally = new Map(), seen = {};
+  for (const j of found) {
+    for (const c of codesOf(j)) {
+      tally.set(c, (tally.get(c) || 0) + 1);
+      if (!seen[c] && j.country_code === c && j.country) seen[c] = j.country;
+    }
+  }
+  const prio = (c) => (c === "DE" ? 0 : EUROPE_CODES.has(c) ? 1 : 2);
+  const list = [...tally].map(([code, count]) => ({
+    code, count, priority: prio(code),
+    name: code === UNKNOWN ? "Worldwide / Remote" : code === "EU" ? "Europe-wide" : names[code] || seen[code] || code,
+  }));
+  list.sort((a, b) => a.priority - b.priority || (a.code === UNKNOWN) - (b.code === UNKNOWN) || b.count - a.count);
+  return { total: found.length, countries: list };
 }

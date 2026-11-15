@@ -315,7 +315,10 @@ export async function buildSnapshot(f = fetch, prev = null) {
   if (names.every((n) => !status[n].ok)) {
     throw new Error("Toutes les sources ont echoue: " + names.map((n) => n + " -> " + status[n].error).join(" | "));
   }
-  return { generated_at: new Date().toISOString(), cache_duration_seconds: CACHE_DURATION, sources: status, jobs: mergeJobs(all) };
+  const jobs = mergeJobs(all);
+  const country_names = {};
+  for (const j of jobs) for (const c of j.countries) country_names[c] = NAMES[c] || c;
+  return { generated_at: new Date().toISOString(), cache_duration_seconds: CACHE_DURATION, sources: status, country_names, jobs };
 }
 
 // ------------------------------------------------------------ MAIN
