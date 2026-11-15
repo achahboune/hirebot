@@ -84,6 +84,30 @@ console.log("facets Europe:", fcs.countries.map((c) => c.code + ":" + c.count).j
 assert.equal(fcs.countries[0].code, "DE"); assert.ok(fcs.countries.every((c) => c.priority <= 1));
 assert.ok((await post(snap, q("Worldwide", [], { country_codes: ["ZZ"] }))).data.every((r) => r.country_code === null), "ZZ = pays inconnu");
 
+// ---- score de match + offres nouvelles
+const pool = [
+  { ...mk(1, 0, "DE", "2025-10-01")[0], id: "a", title: "Senior Python Developer", kw: "senior python developer django postgres", first_seen: "2025-10-20T10:00:00.000Z" },
+  { ...mk(1, 0, "DE", "2025-10-05")[0], id: "b", title: "Java Developer", kw: "java developer spring python", first_seen: "2025-10-10T10:00:00.000Z" },
+  { ...mk(1, 0, "DE", "2025-10-09")[0], id: "c", title: "Go Developer", kw: "go developer", first_seen: null },
+];
+const ranked = filterJobs(pool, { region: "Germany", skills: ["python", "django"], max_results: 100 });
+assert.deepEqual(ranked.map((r) => r.id), ["a", "b", "c"], "classement par match");
+assert.ok(ranked[0].match > ranked[1].match && ranked[1].match > ranked[2].match === false || ranked[1].match >= ranked[2].match);
+assert.deepEqual(ranked[0].matched, ["python", "django"]); assert.equal(ranked[2].match, 0);
+assert.equal(ranked[0].match, 100);
+assert.equal(filterJobs(pool, { region: "Germany", max_results: 100 })[0].match, undefined, "pas de match sans profil");
+const fresh = filterJobs(pool, { region: "Germany", new_hours: 24, now: Date.parse("2025-10-20T20:00:00Z"), max_results: 100 });
+assert.deepEqual(fresh.map((r) => r.id), ["a"], "seulement les offres vues il y a < 24 h");
+assert.equal(countryFacets(pool, { region: "Germany", new_hours: 24, now: Date.parse("2025-10-20T20:00:00Z") }).total, 1);
+// first_seen dans le snapshot : 1er snapshot inconnu, puis nouvelles offres horodatees
+assert.ok(snap.jobs.every((j) => j.first_seen === null), "1er snapshot : first_seen inconnu");
+const prevSnap = JSON.parse(JSON.stringify({ ...snap, generated_at: "2025-10-01T00:00:00.000Z" }));
+const removed = prevSnap.jobs.pop();
+const snapB = await buildSnapshot(fakeFetch, prevSnap);
+const byUrl = Object.fromEntries(snapB.jobs.map((j) => [j.apply_url, j.first_seen]));
+assert.equal(byUrl[removed.apply_url] > "2025-10-02", true, "offre absente avant = nouvelle");
+assert.equal(byUrl[prevSnap.jobs[0].apply_url], "2025-10-01T00:00:00.000Z", "offre deja connue : date conservee");
+
 // ---- GET + sources + health
 const rg = await search.onRequestGet({ request: new Request("https://x.test/search?region=Europe&keywords=python&max_results=2"), ...ctx(snap) });
 assert.ok((await rg.json()).length <= 2);

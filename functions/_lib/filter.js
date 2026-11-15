@@ -7,7 +7,7 @@ const KEYWORD_ALIASES = {
 };
 
 export const OUT_FIELDS = ["id", "title", "company", "location", "posted_date", "apply_url", "source", "flag",
-  "country", "country_code", "raw_location", "region_priority", "source_links"];
+  "country", "country_code", "raw_location", "region_priority", "source_links", "first_seen", "match", "matched"];
 
 const EUROPE_CODES = new Set(["DE", "FR", "GB", "IE", "ES", "PT", "IT", "NL", "BE", "LU", "CH", "AT",
   "PL", "CZ", "SK", "HU", "RO", "BG", "GR", "HR", "SI", "RS", "BA", "ME", "AL", "MK",
@@ -36,18 +36,40 @@ const slimOut = (j) => Object.fromEntries(OUT_FIELDS.map((k) => [k, j[k]]));
 export function matching(jobs, q) {
   const region = selectedRegion(q);
   const keys = (Array.isArray(q.keywords) ? q.keywords : []).map((x) => String(x).toLowerCase().trim()).filter(Boolean);
+  const newHours = Number(q.new_hours) || 0, now = Number(q.now) || Date.now();
   return jobs.filter((j) => {
     if (!regionOk(j, region)) return false;
+    if (newHours > 0) { const t = Date.parse(j.first_seen); if (!(t && now - t <= newHours * 3600e3)) return false; }
     if (!keys.length) return true;
     return keys.some((k) => (KEYWORD_ALIASES[k] || [k]).some((f) => j.kw.includes(f)));
   });
+}
+
+// Score de correspondance profil <-> offre : competences trouvees dans l'offre (le titre compte plus)
+const forms = (k) => KEYWORD_ALIASES[k] || [k];
+function skillsOf(q) {
+  return (Array.isArray(q.skills) ? q.skills : []).map((s) => String(s).toLowerCase().trim()).filter(Boolean).slice(0, 30);
+}
+function score(j, skills) {
+  const title = (j.title || "").toLowerCase(), matched = [];
+  let pts = 0;
+  for (const s of skills) {
+    const f = forms(s), inTitle = f.some((x) => title.includes(x));
+    if (inTitle || f.some((x) => j.kw.includes(x))) { matched.push(s); pts += inTitle ? 1.5 : 1; }
+  }
+  return { match: Math.min(100, Math.round((100 * pts) / (Math.min(skills.length, 4) * 1.25))), matched };
 }
 
 export function filterJobs(jobs, q) {
   const region = selectedRegion(q);
   const max = Math.min(100, Math.max(1, parseInt(q.max_results, 10) || 100));
   const wanted = (Array.isArray(q.country_codes) ? q.country_codes : []).map((c) => String(c).toUpperCase()).filter(Boolean);
-  let found = matching(jobs, q).sort(byDate); // 1) date recente d'abord
+  const skills = skillsOf(q);
+  let found = matching(jobs, q);
+  if (skills.length) {
+    found = found.map((j) => ({ ...j, ...score(j, skills) })); // copies : on ne modifie pas les donnees d'origine
+    found.sort((a, b) => b.match - a.match || byDate(a, b)); // meilleur match d'abord, puis date
+  } else found.sort(byDate); // date recente d'abord
   if (wanted.length) {
     found = found.filter((j) => codesOf(j).some((c) => wanted.includes(c)));
     found.sort((a, b) => a.region_priority - b.region_priority); // tri stable : date conservee

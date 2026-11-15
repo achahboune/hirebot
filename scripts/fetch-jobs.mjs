@@ -316,6 +316,13 @@ export async function buildSnapshot(f = fetch, prev = null) {
     throw new Error("Toutes les sources ont echoue: " + names.map((n) => n + " -> " + status[n].error).join(" | "));
   }
   const jobs = mergeJobs(all);
+  // first_seen : date a laquelle HireBot a vu l'offre pour la 1re fois (sert au filtre "nouvelles offres")
+  const nowIso = new Date().toISOString(), prevJobs = (prev && prev.jobs) || [], seen = new Map();
+  for (const j of prevJobs) seen.set(normUrl(j.apply_url), j.first_seen || prev.generated_at || null);
+  for (const j of jobs) {
+    const k = normUrl(j.apply_url);
+    j.first_seen = seen.has(k) ? seen.get(k) : (prevJobs.length ? nowIso : null); // 1er snapshot : inconnu
+  }
   const country_names = {};
   for (const j of jobs) for (const c of j.countries) country_names[c] = NAMES[c] || c;
   return { generated_at: new Date().toISOString(), cache_duration_seconds: CACHE_DURATION, sources: status, country_names, jobs };
